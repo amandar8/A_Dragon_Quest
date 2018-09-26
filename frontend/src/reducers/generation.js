@@ -13,7 +13,7 @@ const generationReducer = (state = DEFAULT_GENERATION, action) => {
       return { ...state, status: fetchStates.success, ...action.generation };
     default:
       return state;
-  }
-}
+  };
+};
 
 export default generationReducer;

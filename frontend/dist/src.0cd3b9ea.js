@@ -41310,7 +41310,36 @@ var DragonAvatar = function (_Component) {
 }(_react.Component);
 
 exports.default = DragonAvatar;
-},{"react":14,"../assets":167}],8:[function(require,module,exports) {
+},{"react":14,"../assets":167}],376:[function(require,module,exports) {
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.fetchDragon = undefined;
+
+var _types = require('./types');
+
+var _generation = require('./generation');
+
+var fetchDragon = exports.fetchDragon = function fetchDragon() {
+  return function (dispatch) {
+    dispatch({ type: _types.DRAGON.FETCH });
+
+    return (0, _generation.fetchGeneration)('http://localhost:3000/dragon/new').then(function (response) {
+      return response.json();
+    }).then(function (json) {
+      if (json.type === 'error') {
+        dispatch({ type: _types.DRAGON.FETCH_ERROR, message: json.message });
+      } else {
+        dispatch({ type: _types.DRAGON.FETCH_SUCCESS, dragon: json.dragon });
+      }
+    }).catch(function (error) {
+      return dispatch({ type: _types.DRAGON.FETCH_ERROR, message: error.message });
+    });
+  };
+};
+},{"./types":46,"./generation":34}],8:[function(require,module,exports) {
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -41323,11 +41352,15 @@ var _react = require('react');
 
 var _react2 = _interopRequireDefault(_react);
 
+var _reactRedux = require('react-redux');
+
 var _reactBootstrap = require('react-bootstrap');
 
 var _DragonAvatar = require('./DragonAvatar');
 
 var _DragonAvatar2 = _interopRequireDefault(_DragonAvatar);
+
+var _dragon = require('../actions/dragon');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -41337,45 +41370,16 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-var DEFAULT_DRAGON = {
-  dragonId: '',
-  generationId: '',
-  nickname: '',
-  birthdate: '',
-  traits: []
-};
-
 var Dragon = function (_Component) {
   _inherits(Dragon, _Component);
 
   function Dragon() {
-    var _ref;
-
-    var _temp, _this, _ret;
-
     _classCallCheck(this, Dragon);
 
-    for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
-      args[_key] = arguments[_key];
-    }
-
-    return _ret = (_temp = (_this = _possibleConstructorReturn(this, (_ref = Dragon.__proto__ || Object.getPrototypeOf(Dragon)).call.apply(_ref, [this].concat(args))), _this), _this.state = { dragon: DEFAULT_DRAGON }, _this.fetchDragon = function () {
-      fetch('http://localhost:3000/dragon/new').then(function (response) {
-        return response.json();
-      }).then(function (json) {
-        return _this.setState({ dragon: json.dragon });
-      }).catch(function (error) {
-        return console.error('error', error);
-      });
-    }, _temp), _possibleConstructorReturn(_this, _ret);
+    return _possibleConstructorReturn(this, (Dragon.__proto__ || Object.getPrototypeOf(Dragon)).apply(this, arguments));
   }
 
   _createClass(Dragon, [{
-    key: 'componentDidMount',
-    value: function componentDidMount() {
-      this.fetchDragon();
-    }
-  }, {
     key: 'render',
     value: function render() {
       return _react2.default.createElement(
@@ -41383,10 +41387,10 @@ var Dragon = function (_Component) {
         null,
         _react2.default.createElement(
           _reactBootstrap.Button,
-          { onClick: this.fetchDragon },
+          { onClick: this.props.fetchDragon },
           'New Dragon'
         ),
-        _react2.default.createElement(_DragonAvatar2.default, { dragon: this.state.dragon }),
+        _react2.default.createElement(_DragonAvatar2.default, { dragon: this.props.dragon }),
         ';'
       );
     }
@@ -41395,8 +41399,11 @@ var Dragon = function (_Component) {
   return Dragon;
 }(_react.Component);
 
-exports.default = Dragon;
-},{"react":14,"react-bootstrap":39,"./DragonAvatar":36}],44:[function(require,module,exports) {
+exports.default = (0, _reactRedux.connect)(function (_ref) {
+  var dragon = _ref.dragon;
+  return { dragon: dragon };
+}, { fetchDragon: _dragon.fetchDragon })(Dragon);
+},{"react":14,"react-redux":13,"react-bootstrap":39,"./DragonAvatar":36,"../actions/dragon":376}],44:[function(require,module,exports) {
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -41428,10 +41435,52 @@ var generationReducer = function generationReducer() {
       return _extends({}, state, { status: _fetchStates2.default.success }, action.generation);
     default:
       return state;
-  }
+  };
 };
 
 exports.default = generationReducer;
+},{"../actions/types":46,"./fetchStates":35}],375:[function(require,module,exports) {
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
+var _types = require('../actions/types');
+
+var _fetchStates = require('./fetchStates');
+
+var _fetchStates2 = _interopRequireDefault(_fetchStates);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var DEFAULT_DRAGON = {
+  generationId: '',
+  dragonId: '',
+  nickname: '',
+  birthdate: '',
+  traits: []
+};
+
+var dragon = function dragon() {
+  var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : DEFAULT_DRAGON;
+  var action = arguments[1];
+
+  switch (action.type) {
+    case _types.DRAGON.FETCH:
+      return _extends({}, state, { status: _fetchStates2.default.fetching });
+    case _types.DRAGON.FETCH_ERROR:
+      return _extends({}, state, { status: _fetchStates2.default.error, message: action.message });
+    case _types.DRAGON.FETCH_SUCCESS:
+      return _extends({}, state, { status: _fetchStates2.default.success }, action.dragon);
+    default:
+      return state;
+  };
+};
+
+exports.default = dragon;
 },{"../actions/types":46,"./fetchStates":35}],24:[function(require,module,exports) {
 'use strict';
 
@@ -41443,16 +41492,16 @@ var _generation = require('./generation');
 
 var _generation2 = _interopRequireDefault(_generation);
 
+var _dragon = require('./dragon');
+
+var _dragon2 = _interopRequireDefault(_dragon);
+
 var _redux = require('redux');
-
-var _fetchStates = require('./fetchStates');
-
-var _fetchStates2 = _interopRequireDefault(_fetchStates);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-exports.default = (0, _redux.combineReducers)({ generation: _generation2.default });
-},{"./generation":44,"redux":16,"./fetchStates":35}],45:[function(require,module,exports) {
+exports.default = (0, _redux.combineReducers)({ generation: _generation2.default, dragon: _dragon2.default });
+},{"./generation":44,"./dragon":375,"redux":16}],45:[function(require,module,exports) {
 var bundleURL = null;
 function getBundleURLCached() {
   if (!bundleURL) {
@@ -41569,7 +41618,7 @@ var store = (0, _redux.createStore)(_reducers2.default, window.__REDUX_DEVTOOLS_
     _react2.default.createElement(_Dragon2.default, null)
   )
 ), document.getElementById('root'));
-},{"react":14,"react-dom":15,"react-redux":13,"redux-thunk":12,"./components/Generation":7,"./components/Dragon":8,"redux":16,"./reducers":24,"./index.css":6}],373:[function(require,module,exports) {
+},{"react":14,"react-dom":15,"react-redux":13,"redux-thunk":12,"./components/Generation":7,"./components/Dragon":8,"redux":16,"./reducers":24,"./index.css":6}],374:[function(require,module,exports) {
 
 var OVERLAY_ID = '__parcel__error__overlay__';
 
@@ -41738,5 +41787,5 @@ function hmrAccept(bundle, id) {
     return hmrAccept(global.parcelRequire, id);
   });
 }
-},{}]},{},[373,4])
+},{}]},{},[374,4])
 //# sourceMappingURL=/src.0cd3b9ea.map
