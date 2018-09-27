@@ -6,8 +6,8 @@ export const signup = ({ username, password }) => dispatch => {
 
   return fetch(`${BACKEND.ADDRESS}/account/signup`, {
     method: 'POST',
-    body: jSON.stringify({ username, password }),
-    headers: { 'Content-Type': application/json },
+    body: JSON.stringify({ username, password }),
+    headers: { 'Content-Type': 'application/json' },
     credentials: 'include'
   })
   .then(reponse => Response.json())
@@ -21,4 +21,21 @@ export const signup = ({ username, password }) => dispatch => {
   .catch(error => dispatch({ 
     type: ACCOUNT.FETCH_ERROR, message: error.message
   }));
+};
+
+export const logout = () => dispatch => {
+  dispatch({ type: ACCOUNT.FETCH });
+
+  return fetch(`${BACKEND.ADDRESS}/account/logout`, {
+    credentials: 'include'
+  })
+  .then(response => response.json())
+  .then(json => {
+    if(json.type === 'error') {
+      dispatch({ type: ACCOUNT.FETCH_ERROR, message: json.message });
+    } else {
+      dispatch({ type: ACCOUNT.FETCH_ERROR, ...json });
+    }
+  })
+  .catch(error => dispatch({ type: ACCOUNT.FETCH_ERROR, message: error.message }));
 };

@@ -20923,7 +20923,8 @@ var DRAGON = {
 var ACCOUNT = {
   FETCH: 'ACCOUNT_FETCH',
   FETCH_ERROR: 'ACCOUNT_FETCH_ERROR',
-  FETCH_SUCCESS: 'ACCOUNT_FETCH_SUCCESS'
+  FETCH_SUCCESS: 'ACCOUNT_FETCH_SUCCESS',
+  FETC_LOGOUT_SUCCESS: 'ACCOUNT_FETCH_LOGOUT_SUCCESS'
 };
 
 exports.GENERATION = GENERATION;
@@ -21051,6 +21052,12 @@ var account = function account() {
         status: _fetchStates2.default.success,
         message: action.message,
         logginIn: true
+      });
+    case ACCOUNT_LOGOUT_SUCCESS:
+      return _extends({}, state, {
+        status: _fetchStates2.default.success,
+        message: action.message,
+        loggedIn: false
       });
     default:
       return state;
@@ -41626,7 +41633,67 @@ var Home = function (_Component) {
 }(_react.Component);
 
 exports.default = Home;
-},{"react":11,"./Generation":41,"./Dragon":42}],27:[function(require,module,exports) {
+},{"react":11,"./Generation":41,"./Dragon":42}],371:[function(require,module,exports) {
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.logout = exports.signup = undefined;
+
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
+var _types = require('./types');
+
+var _config = require('../config');
+
+var signup = exports.signup = function signup(_ref) {
+  var username = _ref.username,
+      password = _ref.password;
+  return function (dispatch) {
+    dispatch({ type: _types.ACCOUNT.FETCH });
+
+    return fetch(_config.BACKEND.ADDRESS + '/account/signup', {
+      method: 'POST',
+      body: JSON.stringify({ username: username, password: password }),
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include'
+    }).then(function (reponse) {
+      return Response.json();
+    }).then(function (json) {
+      if (json.type === 'error') {
+        dispatch({ type: _types.ACCOUNT.FETCH_ERROR, message: json.message });
+      } else {
+        dispatch(_extends({ type: _types.ACCOUNT.FETCH_SUCCESS }, json));
+      }
+    }).catch(function (error) {
+      return dispatch({
+        type: _types.ACCOUNT.FETCH_ERROR, message: error.message
+      });
+    });
+  };
+};
+
+var logout = exports.logout = function logout() {
+  return function (dispatch) {
+    dispatch({ type: _types.ACCOUNT.FETCH });
+
+    return fetch(_config.BACKEND.ADDRESS + '/account/logout', {
+      credentials: 'include'
+    }).then(function (response) {
+      return response.json();
+    }).then(function (json) {
+      if (json.type === 'error') {
+        dispatch({ type: _types.ACCOUNT.FETCH_ERROR, message: json.message });
+      } else {
+        dispatch(_extends({ type: _types.ACCOUNT.FETCH_ERROR }, json));
+      }
+    }).catch(function (error) {
+      return dispatch({ type: _types.ACCOUNT.FETCH_ERROR, message: error.message });
+    });
+  };
+};
+},{"./types":63,"../config":62}],27:[function(require,module,exports) {
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -41639,7 +41706,15 @@ var _react = require('react');
 
 var _react2 = _interopRequireDefault(_react);
 
+var _reactRedux = require('react-redux');
+
 var _reactBootstrap = require('react-bootstrap');
+
+var _account = require('../actions/account');
+
+var _fetchStates = require('../reducers/fetchStates');
+
+var _fetchStates2 = _interopRequireDefault(_fetchStates);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -41668,7 +41743,12 @@ var AuthForm = function (_Component) {
     }, _this.updatePassword = function (event) {
       _this.setState({ password: event.target.value });
     }, _this.signup = function () {
-      console.log('this.state', _this.state);
+      var _this$state = _this.state,
+          username = _this$state.username,
+          password = _this$state.password;
+
+
+      _this.props.signup({ username: username, password: password });
     }, _this.login = function () {
       console.log('this.state', _this.state);
     }, _temp), _possibleConstructorReturn(_this, _ret);
@@ -41723,16 +41803,32 @@ var AuthForm = function (_Component) {
             { onClick: this.signup },
             'Sign Up'
           )
-        )
+        ),
+        _react2.default.createElement('br', null),
+        this.Error
       );
+    }
+  }, {
+    key: 'Error',
+    get: function get() {
+      if (this.props.account.status === _fetchStates2.default.error) {
+        return _react2.default.createElement(
+          'div',
+          null,
+          this.props.account.message
+        );
+      }
     }
   }]);
 
   return AuthForm;
 }(_react.Component);
 
-exports.default = AuthForm;
-},{"react":11,"react-bootstrap":57}],7:[function(require,module,exports) {
+exports.default = (0, _reactRedux.connect)(function (_ref2) {
+  var account = _ref2.account;
+  return { account: account };
+}, { signup: _account.signup })(AuthForm);
+},{"react":11,"react-redux":12,"react-bootstrap":57,"../actions/account":371,"../reducers/fetchStates":54}],7:[function(require,module,exports) {
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -41744,6 +41840,8 @@ var _createClass = function () { function defineProperties(target, props) { for 
 var _react = require('react');
 
 var _react2 = _interopRequireDefault(_react);
+
+var _reactRedux = require('react-redux');
 
 var _Home = require('./Home');
 
@@ -41773,7 +41871,7 @@ var Root = function (_Component) {
   _createClass(Root, [{
     key: 'render',
     value: function render() {
-      return false ? _react2.default.createElement(_Home2.default, null) : _react2.default.createElement(_AuthForm2.default, null);
+      return this.props.account.loggedin ? _react2.default.createElement(_Home2.default, null) : _react2.default.createElement(_AuthForm2.default, null);
     }
   }]);
 
@@ -41782,8 +41880,11 @@ var Root = function (_Component) {
 
 ;
 
-exports.default = Root;
-},{"react":11,"./Home":26,"./AuthForm":27}],43:[function(require,module,exports) {
+exports.default = (0, _reactRedux.connect)(function (_ref) {
+  var account = _ref.account;
+  return { account: account };
+}, null)(Root);
+},{"react":11,"react-redux":12,"./Home":26,"./AuthForm":27}],43:[function(require,module,exports) {
 var bundleURL = null;
 function getBundleURLCached() {
   if (!bundleURL) {
@@ -41886,7 +41987,7 @@ var store = (0, _redux.createStore)(_reducers2.default, window.__REDUX_DEVTOOLS_
   { store: store },
   _react2.default.createElement(_Root2.default, null)
 ), document.getElementById('root'));
-},{"react":11,"react-dom":10,"react-redux":12,"redux-thunk":13,"redux":14,"./reducers":21,"./components/Root":7,"./index.css":6}],369:[function(require,module,exports) {
+},{"react":11,"react-dom":10,"react-redux":12,"redux-thunk":13,"redux":14,"./reducers":21,"./components/Root":7,"./index.css":6}],372:[function(require,module,exports) {
 
 var OVERLAY_ID = '__parcel__error__overlay__';
 
@@ -42055,5 +42156,5 @@ function hmrAccept(bundle, id) {
     return hmrAccept(global.parcelRequire, id);
   });
 }
-},{}]},{},[369,4])
+},{}]},{},[372,4])
 //# sourceMappingURL=/src.0cd3b9ea.map

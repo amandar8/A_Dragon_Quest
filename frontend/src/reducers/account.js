@@ -16,6 +16,13 @@ const account = (state = DEFAULT_ACCOUNT, action) => {
         message: action.message,
         logginIn: true
       };
+    case ACCOUNT_LOGOUT_SUCCESS:
+      return { 
+        ...state, 
+        status: fetchStates.success, 
+        message: action.message, 
+        loggedIn: false
+      };
     default:
       return state;
   }
