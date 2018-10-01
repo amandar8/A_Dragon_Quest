@@ -16,9 +16,9 @@ const setSession = ({ username, res, sessionId }) => {
       session = new Session({ username });
       sessionString = session.toString();
 
-      AccountTable.updateSessionId({ 
-        sessionId: session.id, 
-        usernameHash:hash(username) 
+      AccountTable.updateSessionId({
+        sessionId: session.id,
+        usernameHash: hash(username)
       })
       .then(() => {
         setSessionCookie({ sessionString, res });
@@ -31,15 +31,33 @@ const setSession = ({ username, res, sessionId }) => {
 }
 
 const setSessionCookie = ({ sessionString, res }) => {
-  //sets cookie from reponse object. 
-  //browser no longer stores cookie after 1 hour (3,600,000ms)
-  //httpOnly flag create secure cookie
-  //cookie can only be sent over secure https connections
   res.cookie('sessionString', sessionString, {
-  expire: Date.now() + 3600000,
-  httpOnly: true
-  // secure: true
+    expire: Date.now() + 3600000,
+    httpOnly: true
+    // secure: true // use with https
   });
 };
 
-module.exports = { setSession };
+const authenticatedAccount = ({ sessionString }) => {
+  return new Promise((resolve, reject) => {
+    if (!sessionString || !Session.verify(sessionString)) {
+      const error = new Error('Invalid session');
+  
+      error.statusCode = 400;
+  
+      return reject(error);
+    } else {
+      const { username, id } = Session.parse(sessionString);
+  
+      AccountTable.getAccount({ usernameHash: hash(username) })
+        .then(({ account }) => {
+          const authenticated = account.sessionId === id;
+  
+          resolve({ account, authenticated, username });
+        })
+        .catch(error => reject(error));
+    }
+  });
+};
+
+module.exports = { setSession, authenticatedAccount };

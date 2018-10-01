@@ -1,8 +1,10 @@
 const { Router } = require('express');
 const AccountTable = require('../account/table');
+const AccountDragonTable = require('../accountDragon/table');
 const Session = require('../account/session');
 const { hash } = require('../account/helper');
-const { setSession } = require('./helper');
+const { setSession, authenticatedAccount } = require('./helper');
+const { getDragonWithTraits } = require('../dragon/helper');
 
 const router = new Router();
 
@@ -11,7 +13,6 @@ router.post('/signup', (req, res, next) => {
   const usernameHash = hash(username);
   const passwordHash = hash(password);
 
-  //checks if username is already taken
   AccountTable.getAccount({ usernameHash })
     .then(({ account }) => {
       if (!account) {
@@ -52,22 +53,51 @@ router.post('/login', (req, res, next) => {
     .catch(error => next(error));
 });
 
-//logout function
 router.get('/logout', (req, res, next) => {
   const { username } = Session.parse(req.cookies.sessionString);
 
   AccountTable.updateSessionId({
     sessionId: null,
     usernameHash: hash(username)
-    
-  })
-  .then(() => {
+  }).then(() => {
     res.clearCookie('sessionString');
 
     res.json({ message: 'Successful logout' });
-  })
-  .catch(error => next(error));
-  console.log(sessionId); 
+  }).catch(error => next(error));
+});
+
+router.get('/authenticated', (req, res, next) => {
+  authenticatedAccount({ sessionString: req.cookies.sessionString })
+    .then(({ authenticated }) => res.json({ authenticated }))
+    .catch(error => next(error));
+});
+
+router.get('/dragons', (req, res, next) => {
+  authenticatedAccount({ sessionString: req.cookies.sessionString })
+    .then(({ account }) => {
+      return AccountDragonTable.getAccountDragons({
+        accountId: account.id
+      });
+    })
+    .then(({ accountDragons }) => {
+      return Promise.all(
+        accountDragons.map(accountDragon => {
+          return getDragonWithTraits({ dragonId: accountDragon.dragonId });
+        })
+      );
+    })
+    .then(dragons => {
+      res.json({ dragons });
+    })
+    .catch(error => next(error));
+});
+
+router.get('/info', (req, res, next) => {
+  authenticatedAccount({ sessionString: req.cookies.sessionString })
+    .then(({ account, username }) => {
+      res.json({ info: { balance: account.balance, username } });
+    })
+    .catch(error => next(error));
 });
 
 module.exports = router;

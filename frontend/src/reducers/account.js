@@ -6,22 +6,29 @@ const DEFAULT_ACCOUNT = { loggedIn: false };
 const account = (state = DEFAULT_ACCOUNT, action) => {
   switch(action.type) {
     case ACCOUNT.FETCH:
-      return { ...state, status: fetchStates.fetching }
+      return { ...state, status: fetchStates.fetching };
     case ACCOUNT.FETCH_ERROR:
       return { ...state, status: fetchStates.error, message: action.message }
     case ACCOUNT.FETCH_SUCCESS:
       return {
-        ...state, 
+        ...state,
         status: fetchStates.success,
         message: action.message,
-        logginIn: true
+        loggedIn: true
       };
-    case ACCOUNT_LOGOUT_SUCCESS:
-      return { 
-        ...state, 
-        status: fetchStates.success, 
-        message: action.message, 
+    case ACCOUNT.FETCH_LOGOUT_SUCCESS:
+      return {
+        ...state,
+        status: fetchStates.success,
+        message: action.message,
         loggedIn: false
+      };
+    case ACCOUNT.FETCH_AUTHENTICATED_SUCCESS:
+      return {
+        ...state,
+        status: fetchStates.success,
+        message: action.message,
+        loggedIn: action.authenticated
       };
     default:
       return state;

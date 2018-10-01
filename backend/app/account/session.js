@@ -16,12 +16,6 @@ class Session {
     return Session.sessionString({ username, id });
   }
 
-  toString() {
-    const { username, id } = this;
-
-    return Session.sessionString({ username, id });
-  }
-
   static parse(sessionString) {
     const sessionData = sessionString.split(SEPARATOR);
 
@@ -40,7 +34,6 @@ class Session {
     return hash(accountData) === sessionHash;
   }
 
-  //function that returns a string that concats a username and id parameter along with a pipe
   static accountData({ username, id }) {
     return `${username}${SEPARATOR}${id}`;
   }
@@ -48,8 +41,8 @@ class Session {
   static sessionString({ username, id }) {
     const accountData = Session.accountData({ username, id });
 
-    //combines account data and hashed account data
     return `${accountData}${SEPARATOR}${hash(accountData)}`;
   }
 }
+
 module.exports = Session;

@@ -1,12 +1,12 @@
 import { DRAGON } from '../actions/types';
 import fetchStates from './fetchStates';
 
-const DEFAULT_DRAGON = { 
-  generationId: '', 
-  dragonId: '', 
-  nickname: '', 
-  birthdate: '', 
-  traits: [] 
+const DEFAULT_DRAGON = {
+  generationId: '',
+  dragonId: '',
+  nickname: '',
+  birthdate: '',
+  traits: []
 };
 
 const dragon = (state = DEFAULT_DRAGON, action) => {

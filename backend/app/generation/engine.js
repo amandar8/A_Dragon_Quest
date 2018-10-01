@@ -15,18 +15,19 @@ class GenerationEngine {
     clearTimeout(this.timer);
   }
 
-  buildNewGeneration(){
+  buildNewGeneration() {
     const generation = new Generation();
 
     GenerationTable.storeGeneration(generation)
-      .then(({ generationId}) => {
+      .then(({ generationId }) => {
         this.generation = generation;
+
         this.generation.generationId = generationId;
 
         console.log('new generation', this.generation);
 
         this.timer = setTimeout(
-          () => this.buildNewGeneration(), 
+          () => this.buildNewGeneration(),
           this.generation.expiration.getTime() - Date.now()
         );
       })

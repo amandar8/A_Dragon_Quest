@@ -1,42 +1,51 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { Button, FormGroup, FormControl } from 'react-bootstrap';
-import { signup } from '../actions/account';
+import { signup, login } from '../actions/account';
 import fetchStates from '../reducers/fetchStates';
 
 class AuthForm extends Component {
-  state = { username: '', password: ''};
+  state = { username: '', password: '', buttonClicked: false };
 
   updateUsername = event => {
-    this.setState({ username: event.target.value })
+    this.setState({ username: event.target.value });
   }
 
   updatePassword = event => {
-    this.setState({ password: event.target.value})
+    this.setState({ password: event.target.value });
   }
 
   signup = () => {
+    this.setState({ buttonClicked: true });
+
     const { username, password } = this.state;
-    
-    this.props.signup({ username, password })
+
+    this.props.signup({ username, password });
   }
 
   login = () => {
-    console.log('this.state', this.state); 
+    this.setState({ buttonClicked: true });
+
+    const { username, password } = this.state;
+
+    this.props.login({ username, password });
   }
 
   get Error() {
-    if (this.props.account.status === fetchStates.error) {
+    if (
+      this.state.buttonClicked &&
+      this.props.account.status === fetchStates.error
+    ) {
       return <div>{this.props.account.message}</div>
     }
   }
 
-  render() { 
-    return ( 
+  render() {
+    return (
       <div>
-        <h2>Dragons</h2>
+        <h2>Dragon Stack</h2>
         <FormGroup>
-          <FormControl 
+          <FormControl
             type='text'
             value={this.state.username}
             placeholder='username'
@@ -44,7 +53,7 @@ class AuthForm extends Component {
           />
         </FormGroup>
         <FormGroup>
-          <FormControl 
+          <FormControl
             type='password'
             value={this.state.password}
             placeholder='password'
@@ -59,11 +68,11 @@ class AuthForm extends Component {
         <br />
         {this.Error}
       </div>
-     );
+    );
   }
 }
- 
+
 export default connect(
-  ({ account }) => ({ account }) ,
-  { signup }
+  ({ account }) => ({ account }),
+  { signup, login }
 )(AuthForm);

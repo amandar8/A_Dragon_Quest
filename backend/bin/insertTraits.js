@@ -7,12 +7,12 @@ TRAITS.forEach(TRAIT => {
 
   traitValues.forEach(traitValue => {
     pool.query(
-      `INSERT INTO trait("traitType", "traitValue") 
-      VALUES($1, $2)
-      RETURNING id`,
+      `INSERT INTO trait("traitType", "traitValue")
+       VALUES($1, $2)
+       RETURNING id`,
       [traitType, traitValue],
       (error, response) => {
-        if(error) console.error(error);
+        if (error) console.error(error);
 
         const traitId = response.rows[0].id;
 
