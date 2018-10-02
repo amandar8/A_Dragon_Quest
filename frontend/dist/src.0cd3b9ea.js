@@ -46678,7 +46678,7 @@ var Home = function (_Component) {
         _react2.default.createElement(
           'h2',
           null,
-          'Dragon Stack'
+          'Welcome To Dragon Life'
         ),
         _react2.default.createElement(_Generation2.default, null),
         _react2.default.createElement(_Dragon2.default, null),

@@ -14,7 +14,7 @@ class Home extends Component {
         <Button onClick={this.props.logout} className='logout-button'>
           Log Out
         </Button>
-        <h2>Dragon Stack</h2>
+        <h2>Welcome To Dragon Life</h2>
         <Generation />
         <Dragon />
         <hr />
