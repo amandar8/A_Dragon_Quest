@@ -1,0 +1,19 @@
+{
+  "name": "capstone_project",
+  "version": "1.0.0",
+  "description": "A full-stack web application that uses React.js and Redux for the front-end and Node.js, Express.js, and PostgreSQL for the backend.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/amandar8/capstone_project.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/amandar8/capstone_project/issues"
+  },
+  "homepage": "https://github.com/amandar8/capstone_project#readme"
+}
